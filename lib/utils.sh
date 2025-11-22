@@ -100,9 +100,23 @@ check_dependencies() {
   fi
 }
 
-# Fetch data from GitHub API with rate limit handling
+# Fetch data from GitHub API with rate limit handling and caching
 github_api_fetch() {
   local url="$1"
+  local use_cache="${2:-true}"
+
+  # Try cache first if enabled
+  if [[ "$use_cache" == "true" ]] && [[ -f "${PLUGIN_DIR}/lib/cache.sh" ]]; then
+    # shellcheck source=./cache.sh
+    source "${PLUGIN_DIR}/lib/cache.sh"
+
+    local cached_response
+    if cached_response="$(get_cached "$url" 2>/dev/null)"; then
+      echo "$cached_response"
+      return 0
+    fi
+  fi
+
   local temp_file
   temp_file="$(mktemp)"
   local http_code
@@ -117,7 +131,15 @@ github_api_fetch() {
 
   case "$http_code" in
     200)
-      cat "$temp_file"
+      local response
+      response="$(cat "$temp_file")"
+
+      # Save to cache if caching is enabled
+      if [[ "$use_cache" == "true" ]] && [[ -f "${PLUGIN_DIR}/lib/cache.sh" ]]; then
+        save_to_cache "$url" "$response" 2>/dev/null || true
+      fi
+
+      echo "$response"
       rm -f "$temp_file"
       return 0
       ;;
