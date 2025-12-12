@@ -26,3 +26,19 @@ This repo currently uses npm but needs to be converted to Deno.
 - **REQUIRED**: Deno for JavaScript/TypeScript
 - **FORBIDDEN**: npm, npx, node_modules (after conversion)
 - **FALLBACK**: Bun only if Deno is impossible
+
+## Container Policy (RSR)
+
+### Primary Stack
+- **Runtime**: nerdctl (not docker)
+- **Base Image**: wolfi (cgr.dev/chainguard/wolfi-base)
+- **Distroless**: Use distroless variants where possible
+
+### Fallback Stack
+- **Runtime**: podman (if nerdctl unavailable)
+- **Base Image**: alpine (if wolfi unavailable)
+
+### DO NOT:
+- Use `docker` command (use `nerdctl` or `podman`)
+- Use Dockerfile (use Containerfile)
+- Use debian/ubuntu base images (use wolfi/alpine)

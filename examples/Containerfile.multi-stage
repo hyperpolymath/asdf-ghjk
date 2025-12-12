@@ -2,10 +2,10 @@
 # This reduces final image size by only including necessary files
 
 # Build stage
-FROM ubuntu:22.04 AS builder
+FROM cgr.dev/chainguard/wolfi-base:22.04 AS builder
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apk add --no-cache -y \
     git \
     curl \
     tar \
@@ -37,10 +37,10 @@ COPY . .
 RUN ghjk run build
 
 # Production stage
-FROM ubuntu:22.04
+FROM cgr.dev/chainguard/wolfi-base:22.04
 
 # Install only runtime dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apk add --no-cache -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
