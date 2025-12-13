@@ -14,7 +14,7 @@
   '((format-version . "1.0.0")
     (state-schema . "state.scm/v1")
     (created . "2024-11-22")
-    (updated . "2025-12-08")
+    (updated . "2025-12-13")
     (project . "asdf-ghjk")
     (repository . "https://github.com/Hyperpolymath/asdf-ghjk")))
 
@@ -394,7 +394,13 @@
          (date . "2025-12-08")
          (completion . 95)
          (milestone . "Pre-release stabilization")
-         (notes . "STATE.scm created. Ready for v1.0.0 tagging."))))
+         (notes . "STATE.scm created. Ready for v1.0.0 tagging."))
+
+       (snapshot-3
+         (date . "2025-12-13")
+         (completion . 100)
+         (milestone . "OpenSSF Scorecard Full Compliance Verified")
+         (notes . "Verified all 15 workflows have SPDX headers, permissions: read-all, and SHA-pinned actions. Repository is fully compliant with OpenSSF Scorecard requirements."))))
 
     (velocity
       ((period . "2024-11-22")
