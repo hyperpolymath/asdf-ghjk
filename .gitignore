@@ -1,44 +1,79 @@
-# asdf plugin gitignore
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# RSR-compliant .gitignore
 
-# Test artifacts
-test/bats/
-test/bats-support/
-test/bats-assert/
-test/temp/
-*.log
-
-# Downloaded files
-downloads/
-*.tar.gz
-*.zip
-
-# Temporary files
-*.tmp
+# OS & Editor
+.DS_Store
+Thumbs.db
 *.swp
 *.swo
 *~
-.DS_Store
-
-# IDE files
 .idea/
 .vscode/
-*.sublime-*
 
-# asdf local configuration
-.tool-versions
+# Build
+/target/
+/_build/
+/build/
+/dist/
+/out/
 
-# Build artifacts
-dist/
-build/
+# Dependencies
+/node_modules/
+/vendor/
+/deps/
+/.elixir_ls/
 
-# Coverage reports
-coverage/
-*.coverage
+# Rust
+# Cargo.lock  # Keep for binaries
 
-# Environment files
+# Elixir
+/cover/
+/doc/
+*.ez
+erl_crash.dump
+
+# Julia
+*.jl.cov
+*.jl.mem
+/Manifest.toml
+
+# ReScript
+/lib/bs/
+/.bsb.lock
+
+# Python (SaltStack only)
+__pycache__/
+*.py[cod]
+.venv/
+
+# Ada/SPARK
+*.ali
+/obj/
+/bin/
+
+# Haskell
+/.stack-work/
+/dist-newstyle/
+
+# Chapel
+*.chpl.tmp.*
+
+# Secrets
 .env
-.env.local
-.envrc
+.env.*
+*.pem
+*.key
+secrets/
 
-# Metadata
-.metadata
+# Test/Coverage
+/coverage/
+htmlcov/
+
+# Logs
+*.log
+/logs/
+
+# Temp
+/tmp/
+*.tmp
+*.bak
