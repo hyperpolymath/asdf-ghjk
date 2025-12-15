@@ -1,15 +1,7 @@
-# Funding options for asdf-ghjk
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Funding platforms for hyperpolymath projects
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
 
-# GitHub Sponsors
-# github: [username]
-
-# Open Collective
-# open_collective: asdf-ghjk
-
-# Patreon
-# patreon: username
-
-# Custom funding links
-# custom: ['https://example.com']
-
-# Note: Update this file if you set up funding options for the project
+github: hyperpolymath
+ko_fi: hyperpolymath
+liberapay: hyperpolymath
