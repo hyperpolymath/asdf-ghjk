@@ -75,6 +75,75 @@ sort_versions() {
   fi
 }
 
+verify_checksum() {
+  local file_path="$1"
+  local expected_checksum="${2:-}"
+
+  if [[ -z "$expected_checksum" ]]; then
+    # No checksum provided, skip verification
+    return 0
+  fi
+
+  local actual_checksum
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual_checksum="$(sha256sum "$file_path" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    actual_checksum="$(shasum -a 256 "$file_path" | awk '{print $1}')"
+  else
+    echo "Warning: No SHA256 tool found, skipping checksum verification" >&2
+    return 0
+  fi
+
+  if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+    fail "Checksum verification failed! Expected: $expected_checksum, Got: $actual_checksum"
+  fi
+
+  echo "Checksum verified successfully"
+}
+
+get_checksum_url() {
+  local version="$1"
+  local archive_name="$2"
+
+  # Try to get SHA256SUMS or checksums file from release
+  local base_url="https://github.com/$TOOL_REPO/releases/download/v$version"
+  local checksum_url="${base_url}/SHA256SUMS"
+
+  if curl -sfLI "$checksum_url" >/dev/null 2>&1; then
+    echo "$checksum_url"
+    return
+  fi
+
+  # Try without v prefix
+  checksum_url="https://github.com/$TOOL_REPO/releases/download/$version/SHA256SUMS"
+  if curl -sfLI "$checksum_url" >/dev/null 2>&1; then
+    echo "$checksum_url"
+    return
+  fi
+
+  # No checksum file found
+  echo ""
+}
+
+get_expected_checksum() {
+  local checksum_url="$1"
+  local archive_name="$2"
+
+  if [[ -z "$checksum_url" ]]; then
+    echo ""
+    return
+  fi
+
+  local checksums
+  checksums="$(curl -fsSL "$checksum_url" 2>/dev/null)" || {
+    echo ""
+    return
+  }
+
+  # Extract checksum for our archive
+  echo "$checksums" | grep "$archive_name" | awk '{print $1}' | head -1
+}
+
 get_download_url() {
   local version="$1"
   local os
@@ -110,22 +179,43 @@ download_release() {
   local url
   url="$(get_download_url "$version")"
 
+  # Get archive name for checksum lookup
+  local archive_name
+  archive_name="$(basename "$url")"
+
   echo "Downloading $TOOL_NAME $version from $url"
-local archive="$download_path/archive.tar.gz"
-curl -fsSL "$url" -o "$archive" || fail "Download failed"
-tar -xzf "$archive" -C "$download_path" --strip-components=1 2>/dev/null || tar -xzf "$archive" -C "$download_path" 2>/dev/null || fail "Extract failed"
-rm -f "$archive"
-# Find binary
-if [[ -f "$download_path/$BINARY_NAME" ]]; then
-  chmod +x "$download_path/$BINARY_NAME"
-else
-  local found
-  found="$(find "$download_path" -name "$BINARY_NAME" -type f 2>/dev/null | head -1)"
-  if [[ -n "$found" ]]; then
-    mv "$found" "$download_path/$BINARY_NAME"
-    chmod +x "$download_path/$BINARY_NAME"
+  local archive="$download_path/archive.tar.gz"
+  curl -fsSL "$url" -o "$archive" || fail "Download failed"
+
+  # Try to verify checksum if available
+  local checksum_url
+  checksum_url="$(get_checksum_url "$version" "$archive_name")"
+  if [[ -n "$checksum_url" ]]; then
+    local expected_checksum
+    expected_checksum="$(get_expected_checksum "$checksum_url" "$archive_name")"
+    if [[ -n "$expected_checksum" ]]; then
+      verify_checksum "$archive" "$expected_checksum"
+    else
+      echo "No checksum found for $archive_name, skipping verification" >&2
+    fi
+  else
+    echo "No checksum file available, skipping verification" >&2
   fi
-fi
+
+  tar -xzf "$archive" -C "$download_path" --strip-components=1 2>/dev/null || tar -xzf "$archive" -C "$download_path" 2>/dev/null || fail "Extract failed"
+  rm -f "$archive"
+
+  # Find binary
+  if [[ -f "$download_path/$BINARY_NAME" ]]; then
+    chmod +x "$download_path/$BINARY_NAME"
+  else
+    local found
+    found="$(find "$download_path" -name "$BINARY_NAME" -type f 2>/dev/null | head -1)"
+    if [[ -n "$found" ]]; then
+      mv "$found" "$download_path/$BINARY_NAME"
+      chmod +x "$download_path/$BINARY_NAME"
+    fi
+  fi
 }
 
 install_version() {

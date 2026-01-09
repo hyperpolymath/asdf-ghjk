@@ -114,7 +114,7 @@ if $CLEAN_CACHE; then
     if $DRY_RUN; then
       echo "    [DRY RUN] Would remove: $CACHE_DIR"
       find "$CACHE_DIR" -type f 2>/dev/null | head -5
-      local count=$(find "$CACHE_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+      count=$(find "$CACHE_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
       echo "    [DRY RUN] Would delete $count files"
     else
       rm -rf "${CACHE_DIR:?}"/*
@@ -133,7 +133,7 @@ if $CLEAN_DOWNLOADS; then
     if $DRY_RUN; then
       echo "    [DRY RUN] Would remove: $DOWNLOAD_DIR"
       find "$DOWNLOAD_DIR" -name "*.tar.gz" 2>/dev/null | head -5
-      local count=$(find "$DOWNLOAD_DIR" -name "*.tar.gz" 2>/dev/null | wc -l | tr -d ' ')
+      count=$(find "$DOWNLOAD_DIR" -name "*.tar.gz" 2>/dev/null | wc -l | tr -d ' ')
       echo "    [DRY RUN] Would delete $count archives"
     else
       rm -rf "${DOWNLOAD_DIR:?}"/*
@@ -151,16 +151,16 @@ if $CLEAN_OLD_VERSIONS; then
     echo "  - Cleaning old installed versions (keeping 3 most recent)..."
 
     # Get list of installed versions sorted by modification time
-    local versions=()
+    versions=()
     while IFS= read -r version; do
       versions+=("$version")
     done < <(ls -t "$INSTALL_DIR" 2>/dev/null || true)
 
-    local total=${#versions[@]}
+    total=${#versions[@]}
 
     if [[ $total -gt 3 ]]; then
       echo "    Found $total versions, will keep 3 newest"
-      local to_remove=("${versions[@]:3}")
+      to_remove=("${versions[@]:3}")
 
       for version in "${to_remove[@]}"; do
         if $DRY_RUN; then

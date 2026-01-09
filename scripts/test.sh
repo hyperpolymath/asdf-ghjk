@@ -21,7 +21,7 @@ fi
 # Run ShellCheck if available
 if command -v shellcheck &>/dev/null; then
   echo "📝 Running ShellCheck..."
-  if shellcheck bin/* lib/*.sh; then
+  if shellcheck bin/* lib/*.sh lib/*.bash; then
     echo "✅ ShellCheck passed"
   else
     echo "❌ ShellCheck failed"
