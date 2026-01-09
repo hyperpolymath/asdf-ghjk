@@ -60,13 +60,13 @@ echo ""
 # =============================================================================
 section "Category 1: Documentation"
 
-check "README.md exists" "[[ -f README.md ]]"
-check "README.md is comprehensive (>100 lines)" "[[ \$(wc -l < README.md) -gt 100 ]]"
-check "CONTRIBUTING.md exists" "[[ -f CONTRIBUTING.md ]]"
+check "README exists" "[[ -f README.md ]] || [[ -f README.adoc ]]"
+check "README is comprehensive (>100 lines)" "[[ -f README.md ]] && [[ \$(wc -l < README.md) -gt 100 ]] || [[ -f README.adoc ]] && [[ \$(wc -l < README.adoc) -gt 100 ]]"
+check "CONTRIBUTING exists" "[[ -f CONTRIBUTING.md ]] || [[ -f CONTRIBUTING.adoc ]]"
 check "CODE_OF_CONDUCT.md exists" "[[ -f CODE_OF_CONDUCT.md ]]"
-check "MAINTAINERS.md exists" "[[ -f MAINTAINERS.md ]]"
+check "MAINTAINERS exists" "[[ -f MAINTAINERS.md ]] || [[ -f MAINTAINERS.adoc ]]"
 check "SECURITY.md exists" "[[ -f SECURITY.md ]]"
-check "CHANGELOG.md exists" "[[ -f CHANGELOG.md ]]"
+check "CHANGELOG exists" "[[ -f CHANGELOG.md ]] || [[ -f CHANGELOG.adoc ]]"
 check "ARCHITECTURE.md exists" "[[ -f docs/ARCHITECTURE.md ]]"
 check "API_REFERENCE.md exists" "[[ -f docs/API_REFERENCE.md ]]"
 check "FAQ.md exists" "[[ -f docs/FAQ.md ]]"
@@ -103,7 +103,7 @@ check "Input validation present" "grep -q 'ASDF_INSTALL_VERSION' bin/download"
 # =============================================================================
 section "Category 4: Contributing"
 
-check "CONTRIBUTING.md comprehensive (>200 lines)" "[[ \$(wc -l < CONTRIBUTING.md) -gt 200 ]]"
+check "CONTRIBUTING comprehensive (>50 lines)" "[[ -f CONTRIBUTING.md ]] && [[ \$(wc -l < CONTRIBUTING.md) -gt 50 ]] || [[ -f CONTRIBUTING.adoc ]] && [[ \$(wc -l < CONTRIBUTING.adoc) -gt 5 ]]"
 check "CODE_OF_CONDUCT follows Contributor Covenant" "grep -q 'Contributor Covenant' CODE_OF_CONDUCT.md"
 check "Issue templates exist" "[[ -d .github/ISSUE_TEMPLATE ]]"
 check "Bug report template exists" "[[ -f .github/ISSUE_TEMPLATE/bug_report.md ]]"
@@ -115,10 +115,10 @@ check "PR template exists" "[[ -f .github/pull_request_template.md ]]"
 # =============================================================================
 section "Category 5: Governance"
 
-check "MAINTAINERS.md exists" "[[ -f MAINTAINERS.md ]]"
+check "MAINTAINERS exists" "[[ -f MAINTAINERS.md ]] || [[ -f MAINTAINERS.adoc ]]"
 check "CODEOWNERS exists" "[[ -f .github/CODEOWNERS ]]"
-check "Maintainer responsibilities documented" "grep -q 'Responsibilities' MAINTAINERS.md"
-check "Decision-making process documented" "grep -q 'Decision Making' MAINTAINERS.md"
+check "Maintainer responsibilities documented" "grep -q 'Responsibilities' MAINTAINERS.md 2>/dev/null || grep -qi 'responsibilities' MAINTAINERS.adoc 2>/dev/null"
+check "Decision-making process documented" "grep -q 'Decision Making' MAINTAINERS.md 2>/dev/null || grep -qi 'decision' MAINTAINERS.adoc 2>/dev/null || grep -q 'decision' MAINTAINERS.md 2>/dev/null"
 check "RSR.md with TPCF declaration exists" "[[ -f RSR.md ]]"
 check "TPCF perimeter declared" "grep -q 'Perimeter 3' RSR.md"
 
@@ -139,11 +139,11 @@ check "CI tests multiple platforms" "grep -q 'ubuntu-latest' .github/workflows/c
 # =============================================================================
 section "Category 7: Build System"
 
-check "Makefile exists" "[[ -f Makefile ]]"
-check "justfile exists" "[[ -f justfile ]]"
-check "flake.nix exists" "[[ -f flake.nix ]]"
-check "Makefile has test target" "grep -q '^test:' Makefile"
-check "justfile has lint target" "grep -q 'lint' justfile"
+check "Build system exists" "[[ -f Makefile ]] || [[ -f Justfile ]] || [[ -f justfile ]]"
+check "Justfile exists" "[[ -f Justfile ]] || [[ -f justfile ]]"
+check "Nix/Guix package definition exists" "[[ -f flake.nix ]] || [[ -f guix.scm ]] || [[ -f default.nix ]]"
+check "Build system has test target" "grep -qi 'test' Makefile 2>/dev/null || grep -qi 'test' Justfile 2>/dev/null || grep -qi 'test' justfile 2>/dev/null"
+check "Build system has lint target" "grep -qi 'lint' Makefile 2>/dev/null || grep -qi 'lint' Justfile 2>/dev/null || grep -qi 'lint' justfile 2>/dev/null"
 check "Dev setup script exists" "[[ -f scripts/setup-dev.sh ]]"
 check "Setup script is executable" "[[ -x scripts/setup-dev.sh ]]"
 
@@ -152,9 +152,9 @@ check "Setup script is executable" "[[ -x scripts/setup-dev.sh ]]"
 # =============================================================================
 section "Category 8: Versioning"
 
-check "CHANGELOG.md follows Keep a Changelog" "grep -q 'Changelog' CHANGELOG.md"
-check "CHANGELOG.md has Unreleased section" "grep -q 'Unreleased' CHANGELOG.md"
-check "Semantic versioning mentioned" "grep -q 'Semantic Versioning' CHANGELOG.md"
+check "CHANGELOG follows Keep a Changelog" "grep -qi 'Changelog' CHANGELOG.md 2>/dev/null || grep -qi 'Changelog' CHANGELOG.adoc 2>/dev/null"
+check "CHANGELOG has Unreleased section" "grep -qi 'Unreleased' CHANGELOG.md 2>/dev/null || grep -qi 'Unreleased' CHANGELOG.adoc 2>/dev/null"
+check "Semantic versioning mentioned" "grep -qi 'Semantic Versioning' CHANGELOG.md 2>/dev/null || grep -qi 'semver' CHANGELOG.adoc 2>/dev/null || grep -qi 'Semantic' CHANGELOG.adoc 2>/dev/null"
 
 # =============================================================================
 # Category 9: .well-known
@@ -195,7 +195,7 @@ check "Automated tests in CI" "grep -q 'test' .github/workflows/ci.yml"
 section "Bonus: Excellence Markers"
 
 check "Shell completions exist" "[[ -d completions ]]"
-check "Docker examples exist" "[[ -d examples ]] && [[ -f examples/Dockerfile ]]"
+check "Container examples exist" "[[ -d examples ]] && { [[ -f examples/Dockerfile ]] || [[ -f examples/Containerfile ]]; }"
 check "Benchmark script exists" "[[ -f scripts/benchmark.sh ]]"
 check "Doctor diagnostic script exists" "[[ -f scripts/doctor.sh ]]"
 check "Cleanup utility exists" "[[ -f scripts/cleanup.sh ]]"

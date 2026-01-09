@@ -30,12 +30,12 @@ test-file FILE:
 # Run linting (ShellCheck)
 lint:
     @echo "📝 Running ShellCheck..."
-    @shellcheck bin/* lib/*.sh scripts/*.sh
+    @shellcheck bin/* lib/*.sh lib/*.bash scripts/*.sh hooks/*.sh
 
 # Format shell scripts (requires shfmt)
 format:
     @echo "✨ Formatting shell scripts..."
-    @shfmt -w -i 2 -ci bin/* lib/*.sh scripts/*.sh
+    @shfmt -w -i 2 -ci bin/* lib/*.sh lib/*.bash scripts/*.sh
 
 # Run all quality checks (lint + test)
 check: lint test
